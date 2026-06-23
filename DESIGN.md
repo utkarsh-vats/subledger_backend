@@ -240,7 +240,7 @@ sequenceDiagram
     participant LedSvc as LedgerService
 
     Client->>Route: { subscription_id } + JWT
-    Route->>Route: validate Pydantic; verify JWT
+    Route->>Route: validate Pydantic + verify JWT
     Route->>InvSvc: generate_for_subscription(sub_id)
     InvSvc->>SubRepo: get(sub_id)
     SubRepo-->>InvSvc: subscription
@@ -339,7 +339,7 @@ sequenceDiagram
     participant Route as POST /payments/record
     participant PaySvc as PaymentService
     participant PARepo as PaymentAttemptRepo
-    participant InvRepo as InvoiceRepo
+    participant InvRepo as InvoiceRepoW
     participant InvSvc as InvoiceService
     participant LedSvc as LedgerService
 
@@ -353,7 +353,7 @@ sequenceDiagram
     else not found
         PaySvc->>InvRepo: get(invoice_id)
         InvRepo-->>PaySvc: invoice
-        Note over PaySvc: validate: status in {issued, partially_paid, overdue}<br/>currency matches; amount ≤ remaining unpaid
+        Note over PaySvc: validate: status in {issued, partially_paid, overdue}<br/>currency matches + amount ≤ remaining unpaid
         PaySvc->>PARepo: create(idempotency_key, ...)
         alt IntegrityError (concurrent race lost)
             PARepo--xPaySvc: IntegrityError
