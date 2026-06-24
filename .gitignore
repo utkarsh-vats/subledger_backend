@@ -35,3 +35,7 @@ docs\
 docs/
 
 text.txt
+
+celerybeat-schedule*
+celerybeat-schedule/
+/celerybeat-schedule
