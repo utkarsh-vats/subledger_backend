@@ -47,13 +47,14 @@ erDiagram
         uuid id PK
         uuid customer_id FK
         uuid plan_id FK
-        string status "active|paused|cancelled"
+        string status "active|paused|cancelled|expired"
         date start_date
         date current_period_start
         date current_period_end
-        datetime paused_at
-        datetime resumed_at
-        datetime cancelled_at
+        datetime paused_at "nullable"
+        datetime resumed_at "nullable"
+        datetime cancelled_at "nullable"
+        datetime expired_at "nullable"
     }
     INVOICE {
         uuid id PK
@@ -112,7 +113,7 @@ erDiagram
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | PlanService         | Validates price > 0, billing cycle membership, status transitions                                                                        | Touch the database directly                                        |
 | CustomerService     | Creates customers, enforces email uniqueness, fetches profile                                                                            | Validate subscription rules                                        |
-| SubscriptionService | Creates, cancels, pauses, resumes; checks plan is active; prevents duplicate active subscriptions; runs the state machine                | Generate invoices                                                  |
+| SubscriptionService | Creates, cancels, pauses, resumes, expires; checks plan is active; prevents duplicate active subscriptions; runs the state machine       | Generate invoices                                                  |
 | InvoiceService      | Generates subscription invoices (snapshots plan price), creates one-time invoices, applies payments (updates `amount_paid` + status)     | Record payment attempts                                            |
 | PaymentService      | Validates amount/currency, runs idempotency check, records the attempt, delegates to `InvoiceService.apply_payment`, writes ledger entry | Mutate the invoice directly outside the `apply_payment` delegation |
 | LedgerService       | Creates append-only ledger entries, fetches customer ledger                                                                              | Mutate or delete existing entries                                  |
@@ -136,24 +137,25 @@ erDiagram
 
 ## 5. Business Rule Ownership
 
-| Rule                                                              | Enforced where                                                   |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Plan price > 0                                                    | Pydantic schema (`Field(gt=0)`) + PlanService defense-in-depth   |
-| Customer email unique                                             | DB unique constraint + CustomerService catches IntegrityError    |
-| Subscription requires active plan                                 | SubscriptionService                                              |
-| No duplicate active subscription per (customer, plan)             | SubscriptionService + DB partial unique index                    |
-| Subscription pause/resume valid transitions only                  | SubscriptionService state machine                                |
-| Cannot generate invoice for paused/cancelled subscription         | InvoiceService (subscription-driven path)                        |
-| Invoice `amount_due` snapshots plan price at generation           | InvoiceService (snapshot at write time, not reference)           |
-| One-time invoice requires `description` and explicit `amount_due` | InvoiceService (one-time creation path)                          |
-| One-time invoice cannot have a `subscription_id`                  | DB CHECK constraint + InvoiceService                             |
-| Payment currency matches invoice currency                         | PaymentService                                                   |
-| Payment amount ≤ remaining unpaid                                 | PaymentService                                                   |
-| Failed payment does not increase `amount_paid`                    | PaymentService (early branch on `failed` status)                 |
-| Fully paid → `paid`; partial → `partially_paid`                   | InvoiceService.apply_payment (delegated from PaymentService)     |
-| Ledger entries append-only                                        | LedgerRepository (no update/delete methods exposed)              |
-| Idempotent payment recording                                      | PaymentService + DB UNIQUE on `payment_attempts.idempotency_key` |
-| Auth required on mutations                                        | FastAPI dependency on all POST/PATCH routes                      |
+| Rule                                                                                                   | Enforced where                                                   |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Plan price > 0                                                                                         | Pydantic schema (`Field(gt=0)`) + PlanService defense-in-depth   |
+| Customer email unique                                                                                  | DB unique constraint + CustomerService catches IntegrityError    |
+| Subscription requires active plan                                                                      | SubscriptionService                                              |
+| No duplicate active subscription per (customer, plan)                                                  | SubscriptionService + DB partial unique index                    |
+| Subscription pause/resume/cancel/expire valid transitions only                                         | SubscriptionService state machine                                |
+| Cannot generate invoice for paused/cancelled/expired subscription                                      | InvoiceService (subscription-driven path)                        |
+| Subscription auto-transitions to `expired` when the renewal task runs and `current_period_end < today` | SubscriptionService (invoked by Celery beat)                     |
+| Invoice `amount_due` snapshots plan price at generation                                                | InvoiceService (snapshot at write time, not reference)           |
+| One-time invoice requires `description` and explicit `amount_due`                                      | InvoiceService (one-time creation path)                          |
+| One-time invoice cannot have a `subscription_id`                                                       | DB CHECK constraint + InvoiceService                             |
+| Payment currency matches invoice currency                                                              | PaymentService                                                   |
+| Payment amount ≤ remaining unpaid                                                                      | PaymentService                                                   |
+| Failed payment does not increase `amount_paid`                                                         | PaymentService (early branch on `failed` status)                 |
+| Fully paid → `paid`; partial → `partially_paid`                                                        | InvoiceService.apply_payment (delegated from PaymentService)     |
+| Ledger entries append-only                                                                             | LedgerRepository (no update/delete methods exposed)              |
+| Idempotent payment recording                                                                           | PaymentService + DB UNIQUE on `payment_attempts.idempotency_key` |
+| Auth required on mutations                                                                             | FastAPI dependency on all POST/PATCH routes                      |
 
 The pattern is **defense in depth** where it matters: the rules that affect data integrity (uniqueness, idempotency, the invoice-type/subscription-id relationship) are enforced both in the service layer and at the database. A service-layer check is fast feedback for clients; the database constraint is the actual guarantee under concurrency.
 
@@ -264,7 +266,7 @@ POST /invoices/generate { subscription_id }
   → Route validates payload (Pydantic), requires JWT
   → InvoiceService.generate_for_subscription(subscription_id)
       → subscription = subscription_repo.get(subscription_id)        # 404 if missing
-      → assert subscription.status == 'active'                       # 400 if paused/cancelled
+      → assert subscription.status == 'active'                       # 400 if paused/cancelled/expired
       → plan = plan_repo.get(subscription.plan_id)
       → amount_due = plan.price                                      # SNAPSHOT, not reference
       → currency = plan.currency                                     # SNAPSHOT
@@ -339,7 +341,7 @@ sequenceDiagram
     participant Route as POST /payments/record
     participant PaySvc as PaymentService
     participant PARepo as PaymentAttemptRepo
-    participant InvRepo as InvoiceRepoW
+    participant InvRepo as InvoiceRepo
     participant InvSvc as InvoiceService
     participant LedSvc as LedgerService
 
