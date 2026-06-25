@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = Field(default="admin@subledger.local")
     ADMIN_PASSWORD_HASH: str = Field(default="")
 
+    RANDOM_HASH: str = Field(default="")
+
     @property
     def database_url(self) -> str:
         return URL.create(
