@@ -7,6 +7,7 @@ from app.schemas.auth import TokenResponse
 
 router = APIRouter(
     prefix="/auth",
+    tags=["auth"],
 )
 
 @router.post("/login", response_model=TokenResponse)
