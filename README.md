@@ -17,7 +17,7 @@ This project was designed as an Airtribe backend engineering assignment and foll
 
 - Plan creation and management
 - Customer management with unique email handling
-- Subscription lifecycle management including pause/resume/cancel flows
+- Subscription lifecycle management including `pause/resume/cancel/expire` flows
 - Subscription-driven invoice generation
 - Standalone one-time invoice creation
 - Payment recording with idempotency protection
@@ -28,13 +28,13 @@ This project was designed as an Airtribe backend engineering assignment and foll
 
 The backend is organized around a repository + service layer pattern:
 
-- app/api/v1/: versioned API routes
-- app/services/: business logic and orchestration
-- app/repositories/: database access logic
-- app/models/: SQLAlchemy models
-- app/schemas/: request and response DTOs
-- app/workers/: Celery tasks and automation
-- app/core/: configuration, security, and shared utilities
+- `app/api/v1/`: versioned API routes
+- `app/services/`: business logic and orchestration
+- `app/repositories/`: database access logic
+- `app/models/`: SQLAlchemy models
+- `app/schemas/`: request and response DTOs
+- `app/workers/`: Celery tasks and automation
+- `app/core/`: configuration, security, and shared utilities
 
 ## Tech stack
 
@@ -71,7 +71,7 @@ Create a local environment file for Docker and app configuration:
 copy .env.example .env.local
 ```
 
-If no sample file is present in your environment, configure the following values in .env.local:
+If no sample file is present in your environment, configure the following values in `.env.local`:
 
 ```env
 POSTGRES_USER=postgres
@@ -93,9 +93,9 @@ docker compose up --build
 
 This starts:
 
-- the FastAPI app on port 8001
-- PostgreSQL on port 8081
-- Redis on port 6380
+- the FastAPI app on `port 8001`
+- PostgreSQL on `port 8081`
+- Redis on `port 6380`
 - Celery worker
 - Celery beat
 
@@ -107,21 +107,21 @@ docker compose exec web alembic upgrade head
 
 ### 5. Access the API
 
-- Swagger UI: http://localhost:8001/docs
-- ReDoc: http://localhost:8001/redoc
-- Health check: http://localhost:8001/health
+- **Swagger UI:** http://localhost:8001/docs
+- **ReDoc:** http://localhost:8001/redoc
+- **Health check:** http://localhost:8001/health
 
 ## API surface
 
 The API is mounted under /api/v1 and includes endpoints for:
 
-- Auth: /api/v1/auth/login
-- Plans: /api/v1/plans
-- Customers: /api/v1/customers
-- Subscriptions: /api/v1/subscriptions
-- Invoices: /api/v1/invoices and /api/v1/invoices/generate
-- Payments: /api/v1/payments/record
-- Ledger: /api/v1/customers/{customer_id}/ledger
+- **Auth:** `/api/v1/auth/login`
+- **Plans:** `/api/v1/plans`
+- **Customers:** `/api/v1/customers`
+- **Subscriptions:** `/api/v1/subscriptions`
+- **Invoices:** `/api/v1/invoices` and `/api/v1/invoices/generate`
+- **Payments:** `/api/v1/payments/record`
+- **Ledger:** `/api/v1/customers/{customer_id}/ledger`
 
 ## Testing
 
@@ -133,14 +133,14 @@ pytest
 
 ## Project status
 
-This repository contains the backend MVP for SubLedger, including the core subscription billing domain and supporting infrastructure for local development.
+This repository contains the backend MVP for `SubLedger`, including the core subscription billing domain and supporting infrastructure for local development.
 
 ## Planned live URLs
 
 These are future deployment targets and are not currently active:
 
-- api.subledger.obtuse.in — backend API, hosted on an EC2 instance
-- subledger.obtuse.in — frontend application, planned for Next.js on Vercel
+- [api.subledger.obtuse.in](http://api.subledger.obtuse.in/) — backend API, hosted on an EC2 instance
+- [subledger.obtuse.in](https://subledger.obtuse.in) — frontend application, planned for Next.js on Vercel
 
 ## Notes
 
