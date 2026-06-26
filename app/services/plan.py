@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.plan import Plan, PlanStatus
 from app.repositories.plan import PlanRepository
 from app.schemas.plan import PlanCreate, PlanUpdate
-from app.exceptions import NotFoundError
+from app.exceptions import NotFoundError, ValidationError
 
 class PlanService:
     def __init__(self, session: Session, repo: PlanRepository):
@@ -12,7 +12,12 @@ class PlanService:
         self.repo = repo
 
     def create(self, data: PlanCreate) -> Plan:
-        plan = self.repo.create(**data.model_dump())
+        required_fields = ("name", "description", "billing_cycle", "price", "currency", "status")
+        data_dict = data.model_dump()
+        missing_fields = [field for field in required_fields if field not in data_dict]
+        if missing_fields:
+            raise ValidationError(f"Missing required fields: {', '.join(missing_fields)}")
+        plan = self.repo.create(**data_dict)
         self.session.commit()
         return plan
     

@@ -9,6 +9,10 @@ from app.core.config import settings
 
 from app.repositories.plan import PlanRepository
 from app.services.plan import PlanService
+from app.repositories.customer import CustomerRepository
+from app.services.customer import CustomerService
+# from app.repositories.customer import CustomerRepository
+# from app.services.customer import CustomerService
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -37,5 +41,7 @@ def get_current_admin(token: str = Depends(oauth2_scheme)) -> str:
 def get_plan_service(db: Session = Depends(get_db)) -> PlanService:
     return PlanService(db, PlanRepository(db))
 
+def get_customer_service(db: Session = Depends(get_db)) -> CustomerService:
+    return CustomerService(db, CustomerRepository(db))
 
-__all__ = ["get_db", "get_current_admin", "get_plan_service"]
+__all__ = ["get_db", "get_current_admin", "get_plan_service", "get_customer_service"]

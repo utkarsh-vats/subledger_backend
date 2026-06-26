@@ -8,14 +8,26 @@ class PlanRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(self, *, name, description, billing_cycle, price, currency, status) -> Plan:
+    # def create(self, *, name, description, billing_cycle, price, currency, status) -> Plan:
+    #     plan = Plan(
+    #         name=name,
+    #         description=description,
+    #         billing_cycle=billing_cycle,
+    #         price=price,
+    #         currency=currency,
+    #         status=status,
+    #     )
+    #     self.session.add(plan)
+    #     self.session.flush()
+    #     return plan
+    def create(self, **data) -> Plan:
         plan = Plan(
-            name=name,
-            description=description,
-            billing_cycle=billing_cycle,
-            price=price,
-            currency=currency,
-            status=status,
+            name=data["name"],
+            description=data["description"],
+            billing_cycle=data["billing_cycle"],
+            price=data["price"],
+            currency=data["currency"],
+            status=data["status"],
         )
         self.session.add(plan)
         self.session.flush()
