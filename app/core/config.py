@@ -35,6 +35,9 @@ class Settings(BaseSettings):
 
     RANDOM_HASH: str = Field(default="")
 
+    # Testing
+    test_database_url: str = Field(default="", alias="TEST_DATABASE_URL")
+
     @property
     def database_url(self) -> str:
         return URL.create(

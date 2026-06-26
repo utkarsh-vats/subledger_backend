@@ -1,5 +1,5 @@
 [project]
-authors = [{name = "Utkarsh Vats", email = "utkarsh.vats@obtuse.in"}]
+authors = [{ name = "Utkarsh Vats", email = "utkarsh.vats@obtuse.in" }]
 dependencies = [
 	"alembic>=1.18.4",
 	"celery>=5.6.3",
@@ -23,18 +23,11 @@ requires-python = ">=3.14,<3.15"
 version = "0.1.0"
 
 [project.optional-dependencies]
-dev = [
-	"httpx>=0.28.1",
-	"pytest>=9.1.1",
-	"pytest-asyncio>=1.4.0",
-]
+dev = ["httpx>=0.28.1", "pytest>=9.1.1", "pytest-asyncio>=1.4.0"]
 
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = [
-	"setuptools>=68",
-	"wheel",
-]
+requires = ["setuptools>=68", "wheel"]
 
 [tool.setuptools.packages.find]
 exclude = ["tests*"]
@@ -42,9 +35,10 @@ include = ["app*"]
 where = ["."]
 
 [tool.pytest.ini_options]
-asyncio_mode = "auto"
 pythonpath = ["."]
 testpaths = ["tests"]
+cache_dir = "/tmp/.pytest_cache"
+asyncio_mode = "strict"
 
 [tool.pyright]
 pythonVersion = "3.14"
