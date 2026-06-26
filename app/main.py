@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from app.exceptions import SubLedgerError
 
 from app.core.config import settings
 from app.api.v1 import auth, plans, customers, subscriptions, invoices, payments
@@ -10,6 +12,13 @@ app = FastAPI(
     version="0.1.0",
     debug=settings.DEBUG,
 )
+
+@app.exception_handler(SubLedgerError)
+async def handle_subledger_error(request: Request, exc: SubLedgerError) -> JSONResponse:
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=exc.to_dict(),
+    )
 
 # /health for smoke test
 @app.get("/health")

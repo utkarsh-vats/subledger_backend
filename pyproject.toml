@@ -1,50 +1,50 @@
 [project]
-name = "subledger"
-version = "0.1.0"
+authors = [{name = "Utkarsh Vats", email = "utkarsh.vats@obtuse.in"}]
+dependencies = [
+	"alembic>=1.18.4",
+	"celery>=5.6.3",
+	"fastapi>=0.138.0",
+	"bcrypt>=4.0.0,<5.0.0",
+	"psycopg[binary]>=3.3.4",
+	"pydantic>=2.13.4",
+	"pydantic-settings>=2.14.2",
+	"pydantic[email]>=2.0.0",
+	"python-dateutil>=2.9.0.post0",
+	"python-jose[cryptography]>=3.5.0",
+	"python-multipart>=0.0.32",
+	"redis>=8.0.0",
+	"sqlalchemy>=2.0.51",
+	"uvicorn[standard]>=0.49.0",
+]
 description = "Subscriptions and invoice manager."
+name = "subledger"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
-dependencies = [
-    "alembic>=1.18.4",
-    "celery>=5.6.3",
-    "fastapi>=0.138.0",
-    "bcrypt>=4.0.0,<5.0.0",
-    "psycopg[binary]>=3.3.4",
-    "pydantic>=2.13.4",
-    "pydantic-settings>=2.14.2",
-    "pydantic[email]>=2.0.0",
-    "python-dateutil>=2.9.0.post0",
-    "python-jose[cryptography]>=3.5.0",
-    "python-multipart>=0.0.32",
-    "redis>=8.0.0",
-    "sqlalchemy>=2.0.51",
-    "uvicorn[standard]>=0.49.0",
-]
-authors = [{ name = "Utkarsh Vats", email = "utkarsh.vats@obtuse.in" }]
+version = "0.1.0"
 
 [project.optional-dependencies]
 dev = [
-    "httpx>=0.28.1",
-    "pytest>=9.1.1",
-    "pytest-asyncio>=1.4.0",
+	"httpx>=0.28.1",
+	"pytest>=9.1.1",
+	"pytest-asyncio>=1.4.0",
 ]
 
 [build-system]
-requires = [
-    "setuptools>=68",
-    "wheel",
-]
 build-backend = "setuptools.build_meta"
+requires = [
+	"setuptools>=68",
+	"wheel",
+]
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["app*"]
 exclude = ["tests*"]
+include = ["app*"]
+where = ["."]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["tests"]
 pythonpath = ["."]
+testpaths = ["tests"]
 
 [tool.pyright]
 pythonVersion = "3.14"

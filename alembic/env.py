@@ -9,6 +9,15 @@ from alembic import context
 from app.core.config import settings
 from app.db.base import Base
 
+# Import all models here so Alembic autogenerate sees the full schema.
+# Models register themselves on Base.metadata at import time.
+from app.models.plan import Plan                       # noqa: F401
+from app.models.customer import Customer               # noqa: F401
+from app.models.subscription import Subscription       # noqa: F401
+from app.models.invoice import Invoice                 # noqa: F401
+from app.models.payment_attempt import PaymentAttempt  # noqa: F401
+from app.models.ledger_entry import LedgerEntry        # noqa: F401
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

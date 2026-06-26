@@ -29,6 +29,7 @@ def pause_subscription_by_id():
 def resume_subscription_by_id():
     pass
 
+# No /expire endpoint — expiration is system-triggered via Celery beat (see DESIGN.md §5).
 # @router.patch("/{subscription_id}/expire")
 # def expire_subscription_by_id():
 #     pass

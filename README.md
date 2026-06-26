@@ -93,9 +93,9 @@ docker compose up --build
 
 This starts:
 
-- the FastAPI app on `port 8001`
-- PostgreSQL on `port 8081`
-- Redis on `port 6380`
+- the FastAPI app on `http://localhost:8001`
+- PostgreSQL on local `port 8081`
+- Redis on local `port 6380`
 - Celery worker
 - Celery beat
 

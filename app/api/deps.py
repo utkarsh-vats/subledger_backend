@@ -1,10 +1,14 @@
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
+from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.core.security import decode_token
 from app.core.config import settings
+
+from app.repositories.plan import PlanRepository
+from app.services.plan import PlanService
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -30,4 +34,8 @@ def get_current_admin(token: str = Depends(oauth2_scheme)) -> str:
 
     return decoded_token_subject
 
-__all__ = ["get_db", "get_current_admin"]
+def get_plan_service(db: Session = Depends(get_db)) -> PlanService:
+    return PlanService(db, PlanRepository(db))
+
+
+__all__ = ["get_db", "get_current_admin", "get_plan_service"]
