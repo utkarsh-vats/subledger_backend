@@ -9,10 +9,6 @@ class CustomerRepository:
         self.session = session
 
     def create(self, **data) -> Customer:
-        required_fields = ("name", "email", "company_name", "status")
-        missing_fields = [field for field in required_fields if field not in data]
-        if missing_fields:
-            raise ValueError(f"Missing required fields: {', '.join(missing_fields)}")
         customer = Customer(
             name=data["name"],
             email=data["email"],

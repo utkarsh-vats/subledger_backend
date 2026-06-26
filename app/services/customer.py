@@ -3,8 +3,8 @@ import uuid
 from sqlalchemy.orm import Session
 from app.models.customer import Customer, CustomerStatus
 from app.repositories.customer import CustomerRepository
-from app.schemas.customer import CustomerCreate, CustomerResponse, CustomerUpdate
-from app.exceptions import NotFoundError, ValidationError
+from app.schemas.customer import CustomerCreate, CustomerUpdate
+from app.exceptions import NotFoundError
 
 
 class CustomerService:
@@ -13,12 +13,7 @@ class CustomerService:
         self.repo = repo
 
     def create(self, data: CustomerCreate) -> Customer:
-        required_fields = ("name", "email", "company_name", "status")
-        data_dict = data.model_dump()
-        missing_fields = [field for field in required_fields if field not in data_dict]
-        if missing_fields:
-            raise ValidationError(f"Missing required fields: {', '.join(missing_fields)}")
-        customer = self.repo.create(**data_dict)
+        customer = self.repo.create(**data.model_dump())
         self.session.commit()
         return customer
 
@@ -36,12 +31,12 @@ class CustomerService:
         changes = data.model_dump(exclude_unset=True)
         customer =  self.repo.update(customer_id, **changes)
         self.session.commit()
-        # already checked for None | null plan in step 1
+        # already checked for None | null customer in step 1
         return customer     # type: ignore
 
     def set_status(self, customer_id: uuid.UUID, status: CustomerStatus) -> Customer:
         _ = self.get(customer_id)
         customer = self.repo.set_status(customer_id, status)
         self.session.commit()
-        # already checked for None | null plan in step 1
+        # already checked for None | null customer in step 1
         return customer     # type: ignore

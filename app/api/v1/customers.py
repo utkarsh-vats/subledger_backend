@@ -35,13 +35,13 @@ def get_customer_by_id(
     customer = service.get(customer_id)
     return CustomerResponse.model_validate(customer)
 
-@router.patch("/{customer_id}")
+@router.patch("/{customer_id}", response_model=CustomerResponse, status_code=status.HTTP_200_OK)
 def update_customer(
     customer_id: uuid.UUID,
     data: CustomerUpdate,
     service: CustomerService = Depends(get_customer_service),
     _: str = Depends(get_current_admin),
-):
+) -> CustomerResponse:
     customer = service.update(customer_id, data)
     return CustomerResponse.model_validate(customer)
 
