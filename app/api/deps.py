@@ -11,8 +11,8 @@ from app.repositories.plan import PlanRepository
 from app.services.plan import PlanService
 from app.repositories.customer import CustomerRepository
 from app.services.customer import CustomerService
-# from app.repositories.customer import CustomerRepository
-# from app.services.customer import CustomerService
+from app.repositories.subscription import SubscriptionRepository
+from app.services.subscription import SubscriptionService
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -44,4 +44,12 @@ def get_plan_service(db: Session = Depends(get_db)) -> PlanService:
 def get_customer_service(db: Session = Depends(get_db)) -> CustomerService:
     return CustomerService(db, CustomerRepository(db))
 
-__all__ = ["get_db", "get_current_admin", "get_plan_service", "get_customer_service"]
+def get_subscription_service(db: Session = Depends(get_db)) -> SubscriptionService:
+    return SubscriptionService(
+        db,
+        SubscriptionRepository(db),
+        CustomerRepository(db),
+        PlanRepository(db),
+    )
+
+__all__ = ["get_db", "get_current_admin", "get_plan_service", "get_customer_service", "get_subscription_service"]

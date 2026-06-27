@@ -1,10 +1,11 @@
 import uuid
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.models.customer import Customer, CustomerStatus
 from app.repositories.customer import CustomerRepository
 from app.schemas.customer import CustomerCreate, CustomerUpdate
-from app.exceptions import NotFoundError
+from app.exceptions import NotFoundError, ConflictError
 
 
 class CustomerService:
@@ -13,9 +14,16 @@ class CustomerService:
         self.repo = repo
 
     def create(self, data: CustomerCreate) -> Customer:
-        customer = self.repo.create(**data.model_dump())
-        self.session.commit()
-        return customer
+        existing = self.repo.get_customer_by_email(data.email)
+        if existing is not None:
+            raise ConflictError(f"Customer with email {data.email} already exists")
+        try:
+            customer = self.repo.create(**data.model_dump())
+            self.session.commit()
+            return customer
+        except IntegrityError as e:
+            self.session.rollback()
+            raise ConflictError(f"Customer conflict: {data.email}") from e
 
     def get(self, customer_id: uuid.UUID) -> Customer:
         customer = self.repo.get(customer_id)
