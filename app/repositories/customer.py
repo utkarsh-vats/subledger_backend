@@ -21,6 +21,13 @@ class CustomerRepository:
 
     def get(self, customer_id: uuid.UUID) -> Customer | None:
         return self.session.get(Customer, customer_id)
+    
+    def get_customer_by_email(self, email: str) -> Customer | None:
+        stmt = (
+            select(Customer)
+            .where(Customer.email == email)
+        )
+        return self.session.scalars(stmt).one_or_none()
 
     def list(self) -> list[Customer]:
         stmt = select(Customer).order_by(Customer.created_at.desc())

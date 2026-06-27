@@ -1,6 +1,8 @@
 from fastapi import status
 from app.models.customer import CustomerStatus
 
+URL_CUSTOMERS_BASE = "/api/v1/customers"
+
 def _create_customer(client, auth_header, **overrides):
     payload = {
         "name": "test-customer",
@@ -10,7 +12,7 @@ def _create_customer(client, auth_header, **overrides):
     }
     payload.update(overrides)
     response = client.post(
-        "/api/v1/customers",
+        URL_CUSTOMERS_BASE,
         json=payload,
         headers=auth_header,
     )
@@ -19,7 +21,7 @@ def _create_customer(client, auth_header, **overrides):
 
 def test_create_customer_unauthorized(client):
     response = client.post(
-        "/api/v1/customers",
+        URL_CUSTOMERS_BASE,
         json={
             "name": "test-customer-unauthorized",
             "email": "testcustomer@subledger.local",
@@ -42,7 +44,7 @@ def test_create_customer(client, auth_header):
 def test_get_customers(client, auth_header):
     _ = _create_customer(client, auth_header)
     customer_responses = client.get(
-        "/api/v1/customers",
+        URL_CUSTOMERS_BASE,
         headers=auth_header,
     )
     assert customer_responses.status_code == status.HTTP_200_OK, f"Expected 200, got {customer_responses.status_code}: {customer_responses.text}"
@@ -51,7 +53,7 @@ def test_get_customers(client, auth_header):
 def test_get_customer_by_id(client, auth_header):
     response = _create_customer(client, auth_header)
     customer_response = client.get(
-        f"/api/v1/customers/{response['id']}",
+        f"{URL_CUSTOMERS_BASE}/{response['id']}",
         headers=auth_header,
     )
     assert customer_response.status_code == status.HTTP_200_OK, f"Expected 200, got {customer_response.status_code}: {customer_response.text}"
@@ -60,7 +62,7 @@ def test_get_customer_by_id(client, auth_header):
 def test_update_customer(client, auth_header):
     response = _create_customer(client, auth_header)
     customer_response = client.patch(
-        f"/api/v1/customers/{response['id']}",
+        f"{URL_CUSTOMERS_BASE}/{response['id']}",
         json={
             "status": "inactive",
         },
