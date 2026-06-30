@@ -71,3 +71,5 @@ def test_update_customer(client, auth_header):
     assert customer_response.status_code == status.HTTP_200_OK, f"Expected 200, got {customer_response.status_code}: {customer_response.text}"
     assert customer_response.json()["status"] == CustomerStatus.INACTIVE.value, f"Expected customer.status = 'inactive', got {customer_response.json()['status']}: {customer_response.text}"
     
+# TODO - Add tests for /{id}/invoice
+# TODO - Add tests for /{id}/ledger

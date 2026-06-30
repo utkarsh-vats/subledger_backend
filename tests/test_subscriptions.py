@@ -1,8 +1,6 @@
 import uuid
 from fastapi import status
 from datetime import datetime, timezone, timedelta, date
-from app.models.customer import CustomerStatus
-from app.models.plan import PlanStatus
 from app.models.subscription import Subscription, SubscriptionStatus
 
 URL_SUBSCRIPTIONS_BASE = "/api/v1/subscriptions"
