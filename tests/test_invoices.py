@@ -1,11 +1,7 @@
 import uuid
 import random
 from fastapi import status
-from decimal import Decimal
-from datetime import datetime, timezone, timedelta, date
-from app.models.customer import CustomerStatus
-from app.models.subscription import SubscriptionStatus
-from app.models.invoice import Invoice, InvoiceStatus, InvoiceType
+from app.models.invoice import InvoiceStatus, InvoiceType
 
 URL_SUBSCRIPTIONS_BASE = "/api/v1/subscriptions"
 URL_CUSTOMERS_BASE = "/api/v1/customers"

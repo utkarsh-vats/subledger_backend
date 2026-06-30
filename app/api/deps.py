@@ -15,6 +15,9 @@ from app.repositories.subscription import SubscriptionRepository
 from app.services.subscription import SubscriptionService
 from app.repositories.invoice import InvoiceRepository
 from app.services.invoice import InvoiceService
+from app.repositories.payment_attempt import PaymentAttemptRepository
+from app.services.payment import PaymentService
+# from app.services.ledger import LedgerService
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -60,13 +63,29 @@ def get_invoice_service(db: Session = Depends(get_db)) -> InvoiceService:
         InvoiceRepository(db),
         CustomerRepository(db),
         SubscriptionRepository(db),
+        # LedgerService(db),
     )
 
-def get_payment_service():
-    pass
+def get_payment_service(db: Session = Depends(get_db)):
+    invoice_repo = InvoiceRepository(db)
+    # ledger_service = LedgerService(db)
+    invoice_service = InvoiceService(
+        db,
+        invoice_repo,
+        CustomerRepository(db),
+        SubscriptionRepository(db),
+        # ledger_service,
+    )
+    return PaymentService(
+        db,
+        PaymentAttemptRepository(db),
+        invoice_repo,
+        invoice_service,
+        # ledger_service,
+    )
 
-def get_ledger_service():
-    pass
+# def get_ledger_service():
+#     pass
 
 __all__ = [
     "get_db",
@@ -76,5 +95,5 @@ __all__ = [
     "get_subscription_service",
     "get_invoice_service",
     "get_payment_service",
-    "get_ledger_service",
+    # "get_ledger_service",
 ]
